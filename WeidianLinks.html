@@ -89,7 +89,6 @@
     .add-btn:active { transform: scale(0.98); }
     .add-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .add-btn svg { width: 22px; height: 22px; stroke-width: 2.5; }
-    /* Category filters */
     .filter-chips { display: flex; gap: 8px; overflow-x: auto; padding: 8px 4px 4px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
     .filter-chip {
       flex: 0 0 auto; padding: 8px 14px; background: var(--card); border: 1px solid var(--card-border);
@@ -125,7 +124,6 @@
     .empty-state svg { width: 72px; height: 72px; margin-bottom: 18px; opacity: 0.4; stroke: var(--text-dim); }
     .empty-state p { font-size: 1rem; font-weight: 500; margin-bottom: 6px; color: var(--text); }
     .empty-state small { font-size: 0.85rem; }
-    /* Modal */
     .modal-overlay {
       position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
       z-index: 1000; display: flex; align-items: flex-end; padding: env(safe-area-inset-bottom) 0 0;
@@ -171,7 +169,6 @@
       header { padding: 20px 24px; }
       main { padding: 20px 24px; }
     }
-    /* Category colors */
     .cat-vetements { background: rgba(99,102,241,0.2); color: #a5b4fc; border-color: rgba(99,102,241,0.3); }
     .cat-accessoires { background: rgba(236,72,153,0.2); color: #f9a8d4; border-color: rgba(236,72,153,0.3); }
     .cat-chaussures { background: rgba(16,185,129,0.2); color: #86efac; border-color: rgba(16,185,129,0.3); }
@@ -253,7 +250,6 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script>
-    // ===== CONFIG =====
     const CATEGORIES = [
       { id: 'vetements', label: 'Vêtements', icon: '👕', class: 'cat-vetements' },
       { id: 'accessoires', label: 'Accessoires', icon: '🧢', class: 'cat-accessoires' },
@@ -268,7 +264,6 @@
     let activeFilter = 'all';
     let storageAvailable = false;
 
-    // ===== ELEMENTS =====
     const grid = document.getElementById('grid');
     const emptyState = document.getElementById('emptyState');
     const emptyText = document.getElementById('emptyText');
@@ -292,7 +287,6 @@
     const deleteBtn = document.getElementById('deleteBtn');
     const toast = document.getElementById('toast');
 
-    // ===== HELPERS =====
     const FALLBACK_IMG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
 
     function showToast(msg) {
@@ -314,7 +308,6 @@
       return CATEGORIES.find(c => c.id === catId) || CATEGORIES[4];
     }
 
-    // ===== STORAGE =====
     try {
       const test = '__storage_test__';
       localStorage.setItem(test, test);
@@ -327,7 +320,6 @@
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
         links = raw ? JSON.parse(raw) : [];
-        // Migration old links without category
         links = links.map(l => ({ ...l, category: l.category || 'autre' }));
       } catch (e) { links = []; }
     }
@@ -338,7 +330,6 @@
       catch (e) { showToast('Erreur sauvegarde'); }
     }
 
-    // ===== RENDER =====
     function renderFilterChips() {
       filterChips.innerHTML = '';
       const allChip = document.createElement('button');
@@ -417,7 +408,6 @@
       });
     }
 
-    // ===== MODAL =====
     function openModal(link) {
       editingId = link ? link.id : null;
       modalTitle.textContent = link ? 'Modifier le lien' : 'Ajouter un lien';
@@ -425,7 +415,6 @@
       categoryInput.value = link ? link.category : '';
       priceInput.value = link ? link.price : '';
       urlInput.value = link ? link.url : '';
-      // Only show URL in input if it's a regular URL, not a data URL
       const img = link ? link.image : '';
       imageUrlInput.value = (img && img.startsWith('http')) ? img : '';
       imageDataUrl = img || null;
@@ -460,7 +449,6 @@
       }
     }
 
-    // ===== EVENTS =====
     const pickFileBtn = document.getElementById('pickFileBtn');
 
     pickFileBtn.addEventListener('click', () => {
@@ -532,7 +520,6 @@
 
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
 
-    // ===== INIT =====
     loadLinks();
     renderFilterChips();
     renderLinks('');
