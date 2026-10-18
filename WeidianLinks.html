@@ -231,9 +231,13 @@
           <input type="url" id="urlInput" required placeholder="https://weidian.com/item.html?... ou https://detail.1688.com/offer/...">
         </div>
         <div class="form-group">
-          <label for="imageInput">Photo (URL ou fichier)</label>
+          <label for="imageInput">Photo</label>
           <input type="file" id="imageInput" accept="image/*" capture="environment" style="display:none;">
-          <input type="text" id="imageUrlInput" placeholder="https://... ou choisis un fichier" readonly style="cursor:pointer;">
+          <div style="display:flex; gap:8px; margin-bottom:8px;">
+            <input type="url" id="imageUrlInput" placeholder="https://... (colle un lien direct vers l'image)" style="flex:1;" inputmode="url">
+            <button type="button" class="btn" id="pickFileBtn" style="flex:0 0 auto; padding:15px 16px; background:var(--card); border:1px solid var(--card-border); color:var(--text);" aria-label="Choisir un fichier">📁</button>
+            <button type="button" class="btn" id="takePhotoBtn" style="flex:0 0 auto; padding:15px 16px; background:var(--card); border:1px solid var(--card-border); color:var(--text);" aria-label="Prendre une photo">📷</button>
+          </div>
           <div class="photo-preview" id="photoPreview"></div>
         </div>
         <div class="form-actions">
@@ -420,8 +424,10 @@
       categoryInput.value = link ? link.category : '';
       priceInput.value = link ? link.price : '';
       urlInput.value = link ? link.url : '';
-      imageUrlInput.value = link ? link.image : '';
-      imageDataUrl = link ? link.image : null;
+      // Only show URL in input if it's a regular URL, not a data URL
+      const img = link ? link.image : '';
+      imageUrlInput.value = (img && img.startsWith('http')) ? img : '';
+      imageDataUrl = img || null;
       deleteBtn.style.display = link ? 'block' : 'none';
       updatePhotoPreview();
       modalOverlay.classList.add('open');
@@ -454,7 +460,18 @@
     }
 
     // ===== EVENTS =====
-    imageUrlInput.addEventListener('click', () => imageInput.click());
+    const pickFileBtn = document.getElementById('pickFileBtn');
+    const takePhotoBtn = document.getElementById('takePhotoBtn');
+
+    pickFileBtn.addEventListener('click', () => {
+      imageInput.removeAttribute('capture');
+      imageInput.click();
+    });
+
+    takePhotoBtn.addEventListener('click', () => {
+      imageInput.setAttribute('capture', 'environment');
+      imageInput.click();
+    });
 
     imageInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
@@ -462,7 +479,7 @@
       if (!file.type.startsWith('image/')) { showToast('Choisis une image'); return; }
       if (file.size > 5 * 1024 * 1024) { showToast('Image trop lourde (max 5MB)'); return; }
       const reader = new FileReader();
-      reader.onload = () => { imageDataUrl = reader.result; updatePhotoPreview(); imageUrlInput.value = '✓ Image sélectionnée (fichier)'; };
+      reader.onload = () => { imageDataUrl = reader.result; updatePhotoPreview(); imageUrlInput.value = ''; };
       reader.onerror = () => showToast('Erreur lecture fichier');
       reader.readAsDataURL(file);
     });
@@ -470,6 +487,9 @@
     imageUrlInput.addEventListener('input', () => {
       if (imageUrlInput.value.startsWith('http')) {
         imageDataUrl = imageUrlInput.value;
+        updatePhotoPreview();
+      } else if (!imageUrlInput.value) {
+        imageDataUrl = null;
         updatePhotoPreview();
       }
     });
