@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0f172a">
+  <title>Mes Liens Produits</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0b0f1a;
+      --bg-elevated: #111827;
+      --card: #161e2e;
+      --card-border: #1f2a44;
+      --primary: #6366f1;
+      --primary-glow: #818cf8;
+      --accent: #06b6d4;
+      --text: #f1f5f9;
+      --text-muted: #64748b;
+      --text-dim: #475569;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --radius: 16px;
+      --radius-sm: 10px;
+      --shadow: 0 8px 32px rgba(0,0,0,0.35);
+      --shadow-sm: 0 2px 12px rgba(0,0,0,0.2);
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f8fafc;
+        --bg-elevated: #ffffff;
+        --card: #ffffff;
+        --card-border: #e2e8f0;
+        --primary: #4f46e5;
+        --primary-glow: #6366f1;
+        --accent: #0891b2;
+        --text: #0f172a;
+        --text-muted: #64748b;
+        --text-dim: #94a3b8;
+        --shadow: 0 8px 32px rgba(15,23,42,0.12);
+        --shadow-sm: 0 2px 12px rgba(15,23,42,0.08);
+      }
+    }
+    html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      color: var(--text);
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+      background-image:
+        radial-gradient(800px 400px at 20% -10%, rgba(99,102,241,0.15) 0%, transparent 50%),
+        radial-gradient(600px 300px at 80% 110%, rgba(6,182,212,0.1) 0%, transparent 50%);
+      background-attachment: fixed;
+    }
+    header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(17, 24, 39, 0.85);
+      backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid var(--card-border);
+      padding: 16px;
+    }
+    .header-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px; background: linear-gradient(135deg, var(--text) 0%, var(--primary-glow) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .search-box { position: relative; flex: 1; max-width: 100%; }
+    .search-box input {
+      width: 100%; padding: 14px 16px 14px 44px;
+      background: var(--card); border: 1px solid var(--card-border);
+      border-radius: 14px; color: var(--text); font-size: 1rem;
+      transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+    }
+    .search-box input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25); background: var(--bg-elevated); }
+    .search-box input::placeholder { color: var(--text-dim); }
+    .search-box svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; color: var(--text-dim); pointer-events: none; transition: color var(--transition); }
+    .search-box input:focus + svg { color: var(--primary); }
+    .add-btn {
+      width: 100%; margin-top: 12px; padding: 15px 20px;
+      background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+      border: none; border-radius: 14px; color: white; font-size: 1rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      cursor: pointer; transition: transform 0.1s, box-shadow var(--transition), opacity var(--transition);
+      -webkit-tap-highlight-color: transparent; box-shadow: var(--shadow-sm);
+    }
+    .add-btn:active { transform: scale(0.98); }
+    .add-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .add-btn svg { width: 22px; height: 22px; stroke-width: 2.5; }
+    /* Category filters */
+    .filter-chips { display: flex; gap: 8px; overflow-x: auto; padding: 8px 4px 4px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+    .filter-chip {
+      flex: 0 0 auto; padding: 8px 14px; background: var(--card); border: 1px solid var(--card-border);
+      border-radius: 999px; font-size: 0.75rem; font-weight: 600; color: var(--text-muted);
+      cursor: pointer; transition: all var(--transition); white-space: nowrap; scroll-snap-align: start;
+    }
+    .filter-chip:hover { border-color: var(--primary); color: var(--primary); }
+    .filter-chip.active { background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%); border-color: transparent; color: white; box-shadow: 0 4px 16px rgba(99,102,241,0.4); }
+    .filter-chip:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--primary); }
+    main { padding: 16px; padding-bottom: 120px; }
+    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .card {
+      background: var(--card); border: 1px solid var(--card-border); border-radius: var(--radius);
+      overflow: hidden; display: flex; flex-direction: column;
+      transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+      -webkit-tap-highlight-color: transparent; position: relative;
+    }
+    .card::before { content: ''; position: absolute; inset: 0; border-radius: var(--radius); opacity: 0; background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(6,182,212,0.08)); pointer-events: none; transition: opacity var(--transition); }
+    .card:active, .card:hover { transform: translateY(-4px); box-shadow: var(--shadow); border-color: var(--primary); }
+    .card:active::before, .card:hover::before { opacity: 1; }
+    .card-img { width: 100%; aspect-ratio: 1; object-fit: cover; background: var(--bg-elevated); transition: transform 0.4s var(--transition); }
+    .card:hover .card-img { transform: scale(1.03); }
+    .card-badge { position: absolute; top: 10px; left: 10px; z-index: 2; padding: 4px 10px; border-radius: 999px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1); }
+    .card-content { padding: 14px; flex: 1; display: flex; flex-direction: column; gap: 8px; }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+    .card-name { font-size: 0.9rem; font-weight: 600; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; flex: 1; }
+    .card-price { font-size: 1rem; font-weight: 800; color: var(--accent); white-space: nowrap; flex-shrink: 0; }
+    .card-meta { display: flex; align-items: center; gap: 8px; font-size: 0.7rem; color: var(--text-dim); }
+    .card-link { margin-top: auto; padding: 12px; background: var(--bg); border: 1px solid var(--card-border); border-radius: 12px; color: var(--primary); text-decoration: none; font-size: 0.8rem; font-weight: 600; text-align: center; transition: all var(--transition); display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .card-link:active { background: var(--bg-elevated); border-color: var(--primary); color: var(--primary-glow); transform: scale(0.98); }
+    .card-link svg { width: 16px; height: 16px; }
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+    .empty-state svg { width: 72px; height: 72px; margin-bottom: 18px; opacity: 0.4; stroke: var(--text-dim); }
+    .empty-state p { font-size: 1rem; font-weight: 500; margin-bottom: 6px; color: var(--text); }
+    .empty-state small { font-size: 0.85rem; }
+    /* Modal */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+      z-index: 1000; display: flex; align-items: flex-end; padding: env(safe-area-inset-bottom) 0 0;
+      opacity: 0; visibility: hidden; transition: opacity var(--transition), visibility var(--transition);
+    }
+    .modal-overlay.open { opacity: 1; visibility: visible; }
+    .modal {
+      width: 100%; background: var(--bg-elevated); border-top-left-radius: 24px; border-top-right-radius: 24px;
+      padding: 20px 20px 36px; transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      max-height: 90vh; overflow-y: auto;
+    }
+    .modal-overlay.open .modal { transform: translateY(0); }
+    .drag-handle { width: 44px; height: 5px; background: var(--card-border); border-radius: 3px; margin: 0 auto 18px; }
+    .modal h2 { font-size: 1.25rem; font-weight: 800; margin-bottom: 22px; text-align: center; }
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; font-size: 0.7rem; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; padding: 15px 16px; background: var(--card); border: 1px solid var(--card-border);
+      border-radius: 12px; color: var(--text); font-size: 1rem; font-family: inherit;
+      transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); background: var(--bg-elevated); }
+    .form-group select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 44px; }
+    .form-group textarea { min-height: 100px; resize: vertical; }
+    .photo-preview { margin-top: 10px; border-radius: 12px; overflow: hidden; display: none; position: relative; }
+    .photo-preview img { width: 100%; aspect-ratio: 1; object-fit: cover; }
+    .photo-preview .remove-photo { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; border-radius: 50%; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); border: none; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background var(--transition); }
+    .photo-preview .remove-photo:hover { background: var(--danger); }
+    .form-actions { display: flex; gap: 12px; margin-top: 8px; }
+    .btn { flex: 1; padding: 15px; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: opacity var(--transition), transform 0.1s; border: none; -webkit-tap-highlight-color: transparent; }
+    .btn:active { transform: scale(0.97); }
+    .btn-cancel { background: var(--card); color: var(--text); border: 1px solid var(--card-border); }
+    .btn-save { background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%); color: white; box-shadow: var(--shadow-sm); }
+    .delete-btn { width: 100%; margin-top: 14px; padding: 13px; background: transparent; border: 1px solid rgba(239,68,68,0.3); border-radius: 12px; color: var(--danger); font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all var(--transition); -webkit-tap-highlight-color: transparent; }
+    .delete-btn:active { background: rgba(239,68,68,0.15); border-color: var(--danger); }
+    .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--card); border: 1px solid var(--card-border); border-radius: 12px; padding: 14px 24px; font-size: 0.9rem; font-weight: 500; z-index: 1100; opacity: 0; transition: transform var(--transition), opacity var(--transition); box-shadow: var(--shadow); }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    @media (min-width: 600px) {
+      .grid { grid-template-columns: repeat(3, 1fr); }
+      .modal { max-width: 520px; margin: 0 auto; border-radius: 24px; transform: scale(0.95); }
+      .modal-overlay.open .modal { transform: scale(1); }
+      .modal-overlay { align-items: center; justify-content: center; padding: 0; }
+      header { padding: 20px 24px; }
+      main { padding: 20px 24px; }
+    }
+    /* Category colors */
+    .cat-vetements { background: rgba(99,102,241,0.2); color: #a5b4fc; border-color: rgba(99,102,241,0.3); }
+    .cat-accessoires { background: rgba(236,72,153,0.2); color: #f9a8d4; border-color: rgba(236,72,153,0.3); }
+    .cat-chaussures { background: rgba(16,185,129,0.2); color: #86efac; border-color: rgba(16,185,129,0.3); }
+    .cat-sacs { background: rgba(245,158,11,0.2); color: #fde68a; border-color: rgba(245,158,11,0.3); }
+    .cat-autre { background: rgba(100,116,139,0.2); color: #cbd5e1; border-color: rgba(100,116,139,0.3); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-top">
+      <h1>Mes Liens Produits</h1>
+    </div>
+    <div class="search-box">
+      <input type="search" id="searchInput" placeholder="Rechercher par nom..." aria-label="Rechercher">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    </div>
+    <div class="filter-chips" id="filterChips" role="tablist" aria-label="Filtrer par catégorie"></div>
+    <button class="add-btn" id="addBtn" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <span id="addBtnText">Ajouter un lien</span>
+    </button>
+  </header>
+
+  <main>
+    <div class="grid" id="grid" role="list"></div>
+    <div class="empty-state" id="emptyState" style="display:none;" aria-live="polite">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <p id="emptyText">Aucun lien pour l'instant</p>
+      <small id="emptySub">Appuie sur « Ajouter un lien » pour commencer</small>
+    </div>
+  </main>
+
+  <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <div class="drag-handle"></div>
+      <h2 id="modalTitle">Ajouter un lien</h2>
+      <form id="linkForm">
+        <div class="form-group">
+          <label for="nameInput">Nom</label>
+          <input type="text" id="nameInput" required placeholder="Ex: Nike Air Max 270" maxlength="100">
+        </div>
+        <div class="form-group">
+          <label for="categoryInput">Catégorie</label>
+          <select id="categoryInput" required>
+            <option value="">Choisir une catégorie</option>
+            <option value="vetements">👕 Vêtements</option>
+            <option value="accessoires">🧢 Accessoires</option>
+            <option value="chaussures">👟 Chaussures</option>
+            <option value="sacs">👜 Sacs</option>
+            <option value="autre">📦 Autre</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="priceInput">Prix (¥)</label>
+          <input type="number" id="priceInput" required placeholder="Ex: 189" min="0" step="0.01" inputmode="decimal">
+        </div>
+        <div class="form-group">
+          <label for="urlInput">Lien produit (Weidian, 1688, etc.)</label>
+          <input type="url" id="urlInput" required placeholder="https://weidian.com/item.html?... ou https://detail.1688.com/offer/...">
+        </div>
+        <div class="form-group">
+          <label for="imageInput">Photo (URL ou fichier)</label>
+          <input type="file" id="imageInput" accept="image/*" capture="environment" style="display:none;">
+          <input type="text" id="imageUrlInput" placeholder="https://... ou choisis un fichier" readonly style="cursor:pointer;">
+          <div class="photo-preview" id="photoPreview"></div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-cancel" id="cancelBtn">Annuler</button>
+          <button type="submit" class="btn btn-save" id="saveBtn">Enregistrer</button>
+        </div>
+        <button type="button" class="delete-btn" id="deleteBtn" style="display:none;">Supprimer ce lien</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    // ===== CONFIG =====
+    const CATEGORIES = [
+      { id: 'vetements', label: 'Vêtements', icon: '👕', class: 'cat-vetements' },
+      { id: 'accessoires', label: 'Accessoires', icon: '🧢', class: 'cat-accessoires' },
+      { id: 'chaussures', label: 'Chaussures', icon: '👟', class: 'cat-chaussures' },
+      { id: 'sacs', label: 'Sacs', icon: '👜', class: 'cat-sacs' },
+      { id: 'autre', label: 'Autre', icon: '📦', class: 'cat-autre' }
+    ];
+    const STORAGE_KEY = 'weidian_links_v2';
+    let links = [];
+    let editingId = null;
+    let imageDataUrl = null;
+    let activeFilter = 'all';
+    let storageAvailable = false;
+
+    // ===== ELEMENTS =====
+    const grid = document.getElementById('grid');
+    const emptyState = document.getElementById('emptyState');
+    const emptyText = document.getElementById('emptyText');
+    const emptySub = document.getElementById('emptySub');
+    const searchInput = document.getElementById('searchInput');
+    const filterChips = document.getElementById('filterChips');
+    const addBtn = document.getElementById('addBtn');
+    const addBtnText = document.getElementById('addBtnText');
+    const modalOverlay = document.getElementById('modalOverlay');
+    const modalTitle = document.getElementById('modalTitle');
+    const linkForm = document.getElementById('linkForm');
+    const nameInput = document.getElementById('nameInput');
+    const categoryInput = document.getElementById('categoryInput');
+    const priceInput = document.getElementById('priceInput');
+    const urlInput = document.getElementById('urlInput');
+    const imageUrlInput = document.getElementById('imageUrlInput');
+    const imageInput = document.getElementById('imageInput');
+    const photoPreview = document.getElementById('photoPreview');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const saveBtn = document.getElementById('saveBtn');
+    const deleteBtn = document.getElementById('deleteBtn');
+    const toast = document.getElementById('toast');
+
+    // ===== HELPERS =====
+    const FALLBACK_IMG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    function formatPrice(price) {
+      return '¥' + Number(price).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function escapeHtml(str) {
+      const map = {'&':'&','<':'<','>':'>','"':'"',"'":'&apos;'};
+      return String(str).replace(/[&<>"']/g, c => map[c]);
+    }
+
+    function getCat(catId) {
+      return CATEGORIES.find(c => c.id === catId) || CATEGORIES[4];
+    }
+
+    // ===== STORAGE =====
+    try {
+      const test = '__storage_test__';
+      localStorage.setItem(test, test);
+      localStorage.removeItem(test);
+      storageAvailable = true;
+    } catch (e) { console.warn('localStorage indisponible'); }
+
+    function loadLinks() {
+      if (!storageAvailable) return;
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        links = raw ? JSON.parse(raw) : [];
+        // Migration old links without category
+        links = links.map(l => ({ ...l, category: l.category || 'autre' }));
+      } catch (e) { links = []; }
+    }
+
+    function saveLinks() {
+      if (!storageAvailable) return;
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(links)); }
+      catch (e) { showToast('Erreur sauvegarde'); }
+    }
+
+    // ===== RENDER =====
+    function renderFilterChips() {
+      filterChips.innerHTML = '';
+      const allChip = document.createElement('button');
+      allChip.className = 'filter-chip' + (activeFilter === 'all' ? ' active' : '');
+      allChip.textContent = 'Tout';
+      allChip.setAttribute('role', 'tab');
+      allChip.setAttribute('aria-selected', activeFilter === 'all');
+      allChip.addEventListener('click', () => setFilter('all'));
+      filterChips.appendChild(allChip);
+
+      CATEGORIES.forEach(cat => {
+        const chip = document.createElement('button');
+        chip.className = 'filter-chip' + (activeFilter === cat.id ? ' active' : '');
+        chip.textContent = cat.icon + ' ' + cat.label;
+        chip.setAttribute('role', 'tab');
+        chip.setAttribute('aria-selected', activeFilter === cat.id);
+        chip.addEventListener('click', () => setFilter(cat.id));
+        filterChips.appendChild(chip);
+      });
+    }
+
+    function setFilter(catId) {
+      activeFilter = catId;
+      renderFilterChips();
+      renderLinks(searchInput.value);
+    }
+
+    function renderLinks(filter = '') {
+      const filtered = links.filter(l => {
+        const matchesSearch = (l.name || '').toLowerCase().includes(filter.toLowerCase());
+        const matchesCat = activeFilter === 'all' || l.category === activeFilter;
+        return matchesSearch && matchesCat;
+      });
+
+      grid.innerHTML = '';
+      if (filtered.length === 0) {
+        grid.style.display = 'none';
+        emptyState.style.display = 'block';
+        emptyText.textContent = filter || activeFilter !== 'all' ? 'Aucun résultat' : 'Aucun lien pour l\'instant';
+        emptySub.textContent = filter ? 'Essaie un autre terme' : (activeFilter !== 'all' ? 'Aucun lien dans cette catégorie' : 'Appuie sur « Ajouter un lien » pour commencer');
+        return;
+      }
+      grid.style.display = 'grid';
+      emptyState.style.display = 'none';
+
+      filtered.forEach(link => {
+        const cat = getCat(link.category);
+        const card = document.createElement('article');
+        card.className = 'card';
+        card.setAttribute('role', 'listitem');
+        card.style.cursor = 'pointer';
+        const imgSrc = link.image || FALLBACK_IMG;
+
+        card.innerHTML =
+          '<span class="card-badge ' + cat.class + '">' + cat.icon + ' ' + escapeHtml(cat.label) + '</span>' +
+          '<img class="card-img" src="' + escapeHtml(imgSrc) + '" alt="' + escapeHtml(link.name) + '" loading="lazy" onerror="this.src=\'' + FALLBACK_IMG + '\'">' +
+          '<div class="card-content">' +
+            '<div class="card-header">' +
+              '<div class="card-name">' + escapeHtml(link.name) + '</div>' +
+              '<div class="card-price">' + formatPrice(link.price) + '</div>' +
+            '</div>' +
+            '<div class="card-meta">' +
+              '<span>' + new Date(link.createdAt || Date.now()).toLocaleDateString('fr-FR') + '</span>' +
+            '</div>' +
+            '<a class="card-link" href="' + escapeHtml(link.url) + '" target="_blank" rel="noopener">' +
+              'Ouvrir le lien' +
+              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>' +
+            '</a>' +
+          '</div>';
+
+        card.addEventListener('click', (e) => {
+          if (e.target.closest('.card-link') || e.target.closest('.card-badge')) return;
+          openModal(link);
+        });
+        grid.appendChild(card);
+      });
+    }
+
+    // ===== MODAL =====
+    function openModal(link) {
+      editingId = link ? link.id : null;
+      modalTitle.textContent = link ? 'Modifier le lien' : 'Ajouter un lien';
+      nameInput.value = link ? link.name : '';
+      categoryInput.value = link ? link.category : '';
+      priceInput.value = link ? link.price : '';
+      urlInput.value = link ? link.url : '';
+      imageUrlInput.value = link ? link.image : '';
+      imageDataUrl = link ? link.image : null;
+      deleteBtn.style.display = link ? 'block' : 'none';
+      updatePhotoPreview();
+      modalOverlay.classList.add('open');
+      setTimeout(() => nameInput.focus(), 150);
+    }
+
+    function closeModal() {
+      modalOverlay.classList.remove('open');
+      editingId = null;
+      imageDataUrl = null;
+      linkForm.reset();
+      photoPreview.style.display = 'none';
+      photoPreview.innerHTML = '';
+    }
+
+    function updatePhotoPreview() {
+      if (imageDataUrl) {
+        photoPreview.innerHTML = '<img src="' + escapeHtml(imageDataUrl) + '" alt="Aperçu"><button type="button" class="remove-photo" aria-label="Supprimer la photo"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';
+        photoPreview.style.display = 'block';
+        photoPreview.querySelector('.remove-photo').addEventListener('click', (e) => {
+          e.stopPropagation();
+          imageDataUrl = null;
+          imageUrlInput.value = '';
+          updatePhotoPreview();
+        });
+      } else {
+        photoPreview.style.display = 'none';
+        photoPreview.innerHTML = '';
+      }
+    }
+
+    // ===== EVENTS =====
+    imageUrlInput.addEventListener('click', () => imageInput.click());
+
+    imageInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (!file.type.startsWith('image/')) { showToast('Choisis une image'); return; }
+      if (file.size > 5 * 1024 * 1024) { showToast('Image trop lourde (max 5MB)'); return; }
+      const reader = new FileReader();
+      reader.onload = () => { imageDataUrl = reader.result; updatePhotoPreview(); imageUrlInput.value = '✓ Image sélectionnée (fichier)'; };
+      reader.onerror = () => showToast('Erreur lecture fichier');
+      reader.readAsDataURL(file);
+    });
+
+    imageUrlInput.addEventListener('input', () => {
+      if (imageUrlInput.value.startsWith('http')) {
+        imageDataUrl = imageUrlInput.value;
+        updatePhotoPreview();
+      }
+    });
+
+    linkForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = nameInput.value.trim();
+      const category = categoryInput.value;
+      const price = parseFloat(priceInput.value);
+      const url = urlInput.value.trim();
+      if (!name || !category || isNaN(price) || !url) { showToast('Remplis tous les champs'); return; }
+      if (!/^https?:\/\//i.test(url)) { showToast('Lien invalide (http:// ou https://)'); return; }
+
+      const linkData = { name, category, price, url, image: imageDataUrl || '' };
+      if (editingId) {
+        links = links.map(l => l.id === editingId ? { ...l, ...linkData } : l);
+        showToast('Lien modifié');
+      } else {
+        links.unshift({ id: Date.now().toString(), ...linkData, createdAt: Date.now() });
+        showToast('Lien ajouté');
+      }
+      saveLinks();
+      renderLinks(searchInput.value);
+      closeModal();
+    });
+
+    deleteBtn.addEventListener('click', () => {
+      if (!editingId) return;
+      if (confirm('Supprimer ce lien ?')) {
+        links = links.filter(l => l.id !== editingId);
+        saveLinks();
+        renderLinks(searchInput.value);
+        closeModal();
+        showToast('Lien supprimé');
+      }
+    });
+
+    cancelBtn.addEventListener('click', closeModal);
+    modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
+
+    function handleAddClick() { openModal(null); }
+    addBtn.addEventListener('click', handleAddClick);
+    addBtn.addEventListener('touchstart', (e) => { e.preventDefault(); handleAddClick(); }, { passive: false });
+
+    searchInput.addEventListener('input', () => renderLinks(searchInput.value));
+
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+    // ===== INIT =====
+    loadLinks();
+    renderFilterChips();
+    renderLinks('');
+  </script>
+</body>
+</html>
